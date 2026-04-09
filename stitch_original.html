@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>E &amp; J | The Digital Heirloom</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;family=Great+Vibes&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .font-cursive { font-family: 'Great Vibes', cursive; }
+        .font-notoSerif { font-family: 'Noto Serif', serif; }
+        .font-plusJakartaSans { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .gold-gradient-btn {
+            background: linear-gradient(135deg, #775a19 0%, #d4ad65 100%);
+        }
+        .qr-metallic {
+            background: radial-gradient(circle at center, #ffffff 0%, #e8e6e1 100%);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05), 0 10px 20px rgba(119, 90, 25, 0.1);
+        }
+        .hero-gradient {
+            background: linear-gradient(to bottom, transparent 60%, #faf9f6 100%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-background": "#1a1c1a",
+                      "surface": "#faf9f6",
+                      "inverse-primary": "#e9c176",
+                      "on-primary-container": "#5b4000",
+                      "tertiary-fixed-dim": "#c6c6c7",
+                      "secondary": "#6a5d43",
+                      "surface-container": "#efeeeb",
+                      "on-surface-variant": "#4d4635",
+                      "surface-variant": "#e3e2e0",
+                      "tertiary": "#5d5f5f",
+                      "on-tertiary-container": "#444546",
+                      "secondary-fixed": "#f3e0c0",
+                      "on-secondary": "#ffffff",
+                      "inverse-surface": "#2f312f",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed-variant": "#51452d",
+                      "primary-container": "#d4ad65",
+                      "tertiary-container": "#b2b3b3",
+                      "surface-container-high": "#e9e8e5",
+                      "on-secondary-fixed": "#231a06",
+                      "secondary-container": "#f0debd",
+                      "surface-tint": "#775a19",
+                      "primary-fixed": "#ffdea5",
+                      "on-primary": "#ffffff",
+                      "on-surface": "#1a1c1a",
+                      "on-secondary-container": "#6e6147",
+                      "background": "#faf9f6",
+                      "inverse-on-surface": "#f2f1ee",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#5d4201",
+                      "primary": "#775a19",
+                      "surface-bright": "#faf9f6",
+                      "secondary-fixed-dim": "#d6c4a5",
+                      "on-primary-fixed": "#261900",
+                      "surface-container-low": "#f4f3f1",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed": "#1a1c1c",
+                      "surface-container-highest": "#e3e2e0",
+                      "error-container": "#ffdad6",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#454747",
+                      "tertiary-fixed": "#e2e2e2",
+                      "outline-variant": "#d0c5af",
+                      "surface-dim": "#dbdad7",
+                      "outline": "#7f7663",
+                      "primary-fixed-dim": "#e9c176"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              }
+            },
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-plusJakartaSans selection:bg-primary-fixed selection:text-on-primary-fixed-variant">
+<main class="overflow-x-hidden pb-12">
+<!-- Hero Section -->
+<section class="relative h-screen w-full overflow-hidden flex flex-col items-center justify-end">
+<!-- Full-screen Background Image -->
+<div class="absolute inset-0 z-0">
+<img alt="Couple silhouette portrait" class="w-full h-full object-cover" data-alt="wide shot of a romantic couple in silhouette against a dramatic sunset and rugged mountain landscape, deep oranges and cinematic shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArKNbBhpwUjVxwI6sfWLeUo0rR02Kc86q2G9jGVQ9JDPv6tiAdfINh1R_1I0aUbic6Oq83WnUF-gYA12BOeeTrcXrp2KU5DjVpYPnc7pcEG2Gl3FLV-PEDUak4g8gtULbCOFpCKanoi8mEX_xn7_o1nuGVKFSAt-4OhcsQUiLmWnN6RORbJA1O_mqoMAhDV2t7qhxFIcFq3UcwmZrW8wXFg-dft1zYOYvRNibrKweMZ8pWQWgYRY19TQnH-KtVKoip0OdWG5wTb-vH"/>
+<!-- Seamless Gradient Fade-out -->
+<div class="absolute inset-0 hero-gradient"></div>
+</div>
+<!-- Overlaid Content -->
+<div class="relative z-10 text-center space-y-4 pb-20 px-6">
+<span class="text-white/90 font-label tracking-[0.3em] uppercase text-xs drop-shadow-sm">You're Invited</span>
+<h1 class="text-6xl md:text-8xl font-cursive text-primary-container drop-shadow-lg">Elias &amp; Jasmine</h1>
+<p class="text-white/80 font-notoSerif italic text-xl drop-shadow-sm">The Union of Two Souls</p>
+</div>
+</section>
+<section class="px-6 py-16 bg-surface-container-low">
+<div class="max-w-md mx-auto text-center">
+<h2 class="text-sm font-label tracking-[0.2em] uppercase text-outline mb-10">Counting Down To Forever</h2>
+<div class="grid grid-cols-4 gap-3">
+<div class="glass-card p-4 rounded-3xl flex flex-col items-center justify-center shadow-sm">
+<span class="text-3xl font-notoSerif text-primary">24</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant mt-1">Days</span>
+</div>
+<div class="glass-card p-4 rounded-3xl flex flex-col items-center justify-center shadow-sm">
+<span class="text-3xl font-notoSerif text-primary">12</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant mt-1">Hours</span>
+</div>
+<div class="glass-card p-4 rounded-3xl flex flex-col items-center justify-center shadow-sm">
+<span class="text-3xl font-notoSerif text-primary">08</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant mt-1">Mins</span>
+</div>
+<div class="glass-card p-4 rounded-3xl flex flex-col items-center justify-center shadow-sm">
+<span class="text-3xl font-notoSerif text-primary">45</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant mt-1">Secs</span>
+</div>
+</div>
+</div>
+</section>
+<section class="px-6 py-20 relative overflow-hidden">
+<div class="max-w-sm mx-auto">
+<div class="text-center mb-12">
+<h2 class="text-4xl font-notoSerif text-on-surface mb-2">October 24</h2>
+<p class="text-primary font-label tracking-widest uppercase text-xs">Twenty Twenty-Six</p>
+</div>
+<div class="glass-card p-8 rounded-[40px] shadow-sm relative overflow-hidden">
+<div class="grid grid-cols-7 gap-y-6 text-center text-xs font-label">
+<div class="text-outline/40">S</div><div class="text-outline/40">M</div><div class="text-outline/40">T</div><div class="text-outline/40">W</div><div class="text-outline/40">T</div><div class="text-outline/40">F</div><div class="text-outline/40">S</div>
+<div class="text-outline/30">19</div><div class="text-outline/30">20</div><div class="text-outline/30">21</div><div class="text-outline/30">22</div><div class="text-outline/30">23</div>
+<div class="relative flex items-center justify-center">
+<div class="absolute inset-0 bg-primary-container/20 rounded-full scale-150"></div>
+<span class="relative font-bold text-primary">24</span>
+</div>
+<div class="text-outline/30">25</div>
+</div>
+<div class="mt-10 pt-10 border-t border-outline-variant/20 space-y-6">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary-container">schedule</span>
+<div>
+<p class="text-sm font-semibold">The Ceremony</p>
+<p class="text-xs text-on-surface-variant mt-1">Starts at 4:30 PM Sharp</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary-container">celebration</span>
+<div>
+<p class="text-sm font-semibold">Reception &amp; Toasts</p>
+<p class="text-xs text-on-surface-variant mt-1">Following Ceremony until Late</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="px-6 py-16 bg-surface-container">
+<div class="max-w-md mx-auto">
+<div class="mb-10 flex flex-col items-center">
+<span class="material-symbols-outlined text-primary text-4xl mb-4" data-weight="fill">location_on</span>
+<h2 class="text-3xl font-notoSerif mb-2">The Grand Vineyard</h2>
+<p class="text-on-surface-variant text-center text-sm leading-relaxed max-w-[250px]">1200 Estate Lane, Napa Valley, California</p>
+</div>
+<div class="relative w-full aspect-video rounded-[32px] overflow-hidden shadow-lg group">
+<img alt="Art-directed Aerial Map" class="w-full h-full object-cover" data-alt="high-angle aerial shot of a California vineyard estate, dramatic moody color grading, misty morning light, lush greens and dark shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbGDWo564T-wQua3YI8gokcsC-_w84B-l_MJKo8oa6SeO7YC9Ar_5I2xyjDkSmAMYguHCHtLJ6fT9g6gQV7ba283CtId2iVPxtS_aGtiB1Obg3uHcTYyMM8USSiV4zHQBqnVaE88HT1DvbINxmBoHwz_faW94Nzr0BLmcoACD0YdFccknGnZcObiMXC34yixqaUDA0SV2ohs_GbIN5qThkVzg2rQL8pVnSOas3QLRCk5DII7H-dIgd1-RWqslhdAiffOkKsFFcrAwx"/>
+<div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-all duration-700"></div>
+<a class="absolute bottom-6 right-6 glass-card px-6 py-3 rounded-full flex items-center gap-2 text-xs font-semibold hover:bg-white/80 transition-all" href="#">
+                    Open in Maps
+                    <span class="material-symbols-outlined text-sm">open_in_new</span>
+</a>
+</div>
+</div>
+</section>
+<section class="px-6 py-20 bg-surface">
+<div class="max-w-md mx-auto text-center">
+<h2 class="text-3xl font-notoSerif mb-6">Share Your Moments</h2>
+<div class="relative mb-12 flex justify-center">
+<div class="w-24 h-24 bg-primary-container/10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-4xl" data-weight="fill">photo_library</span>
+</div>
+</div>
+<p class="text-on-surface-variant text-sm mb-10 leading-relaxed">
+                Help us capture the magic. Use our dedicated portal or Telegram bot to upload photos you take during the celebration.
+            </p>
+<div class="flex flex-col gap-4">
+<button class="gold-gradient-btn text-white py-4 px-8 rounded-full text-sm font-semibold flex items-center justify-center gap-3 transition-all hover:scale-[1.02]">
+<span class="material-symbols-outlined">send</span>
+                    Open Telegram Bot
+                </button>
+<button class="border border-outline-variant/30 text-primary py-4 px-8 rounded-full text-sm font-semibold transition-all hover:bg-primary/5">
+                    Upload to Gallery
+                </button>
+</div>
+</div>
+</section>
+<section class="px-6 py-20 flex flex-col items-center">
+<div class="glass-card p-10 rounded-[48px] shadow-sm flex flex-col items-center max-w-xs w-full text-center">
+<p class="text-xs font-label uppercase tracking-widest text-outline mb-8">Digital Invitation Access</p>
+<div class="qr-metallic p-6 rounded-[32px] mb-8 relative">
+<div class="bg-white p-2 rounded-[16px] shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)]">
+<img alt="High-quality QR Code" class="w-40 h-40 mix-blend-multiply" data-alt="clean high contrast QR code on a sophisticated metallic finish background with subtle grain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5z49kCzsaxnEJte-zMnFEpn0mVXUZiWarhmhVZEGbQ_1_jjsI6DUrSvSbef4ByqrY-snw-9nAcDDLr8V59Pat_KdYlgzoJaChN4PQt7m627TnmSM7gclYxhn0Cdlz-03FoGzv0y_HFDudLhUdCHFp3VWtqwCgBzeu80KXWC69k4hE9MWawH64QSY_1zWp30KSHZiwATSnQqgotnHytgDQjdrkM1NFTWQ0Kz5mWHZpcn8hR8Wl8lU1SN6NxsIwZ-Xkxadn4t2TtzDi"/>
+</div>
+</div>
+<p class="text-sm font-notoSerif italic text-on-surface-variant">Scanning reveals your personal<br/>gift registry &amp; schedule.</p>
+</div>
+</section>
+</main>
+</body></html>
