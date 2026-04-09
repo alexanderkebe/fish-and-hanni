@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import RSVPModal from "@/components/RSVPModal";
 
 function Countdown() {
   const [mounted, setMounted] = useState(false);
@@ -51,6 +52,9 @@ function Countdown() {
 }
 
 export default function Home() {
+  const [isRSVPModalOpen, setRSVPModalOpen] = useState(false);
+  const [ticket, setTicket] = useState<{id: string, qrUrl: string} | null>(null);
+
   return (
     <main className="overflow-x-hidden pb-12 selection:bg-primary-fixed selection:text-on-primary-fixed-variant">
       
@@ -59,8 +63,13 @@ export default function Home() {
         <div className="absolute inset-0 z-0">
           <img 
             alt="Fish and Hanni Portrait" 
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover block md:hidden landscape:hidden" 
             src="/hero-portrait.webp"
+          />
+          <img 
+            alt="Fish and Hanni Landscape" 
+            className="w-full h-full object-cover hidden md:block landscape:block" 
+            src="/hero-landscape.png"
           />
           <div className="absolute inset-0 hero-gradient"></div>
         </div>
@@ -298,19 +307,56 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. QR Code Section */}
+      {/* 6. RSVP & QR Code Section */}
       <section className="px-6 py-20 md:py-32 flex flex-col items-center">
-        <div className="glass-card p-10 md:p-16 rounded-[48px] shadow-sm md:shadow-lg flex flex-col items-center max-w-xs md:max-w-md w-full text-center hover:scale-[1.02] transition-transform duration-700">
-          <p className="text-xs font-label uppercase tracking-widest text-outline mb-8">Digital Invitation Access</p>
-          <div className="qr-metallic p-6 rounded-[32px] mb-8 relative">
-            <div className="bg-white p-2 rounded-[16px] shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)]">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://fishandhanni.com&color=775a19&bgcolor=ffffff" alt="Invitation QR Code" className="w-40 h-40 mix-blend-multiply" />
-            </div>
+        {!ticket ? (
+          <div className="glass-card p-10 md:p-16 rounded-[48px] shadow-sm md:shadow-lg flex flex-col items-center max-w-sm md:max-w-md w-full text-center transition-all duration-700">
+            <span className="material-symbols-outlined text-5xl text-primary-container mb-6">local_activity</span>
+            <h2 className="text-3xl md:text-4xl font-cursive text-primary mb-3">Join Us</h2>
+            <p className="text-sm md:text-base font-notoSerif italic text-on-surface-variant mb-8">
+              Please confirm your attendance so we can save your seat.
+            </p>
+            <button 
+              onClick={() => setRSVPModalOpen(true)}
+              className="w-full gold-gradient-btn text-white py-5 px-8 rounded-full text-sm font-label uppercase tracking-widest flex items-center justify-center gap-3 transition-transform hover:scale-[1.03] shadow-lg"
+            >
+              RSVP Now
+              <span className="material-symbols-outlined">arrow_forward</span>
+            </button>
           </div>
-          <p className="text-sm font-notoSerif italic text-on-surface-variant">Scanning reveals your personal<br/>gift registry &amp; schedule.</p>
-        </div>
+        ) : (
+          <div className="glass-card p-10 md:p-16 rounded-[48px] shadow-sm md:shadow-lg flex flex-col items-center max-w-xs md:max-w-md w-full text-center hover:scale-[1.02] transition-transform duration-700 animate-in fade-in zoom-in">
+            <div className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-label uppercase tracking-widest mb-6 flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">verified</span>
+              Registration Confirmed
+            </div>
+            
+            <div className="qr-metallic p-6 rounded-[32px] mb-8 relative">
+              <div className="bg-white p-2 rounded-[16px] shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)]">
+                  <img src={ticket.qrUrl} alt="Your Unique Entrance Pass" className="w-40 h-40 mix-blend-multiply" />
+              </div>
+            </div>
+            
+            <p className="text-xs font-label text-outline uppercase tracking-widest mb-2">Ticket ID</p>
+            <p className="text-[10px] font-mono text-on-surface-variant bg-surface-variant/50 px-3 py-1.5 rounded-lg select-all">
+              {ticket.id}
+            </p>
+            <p className="text-sm font-notoSerif italic text-on-surface-variant mt-6">
+              Please present this QR code at the entrance.
+            </p>
+          </div>
+        )}
       </section>
 
+      <RSVPModal 
+        isOpen={isRSVPModalOpen}
+        onClose={() => setRSVPModalOpen(false)}
+        onSuccess={(data) => {
+          setTicket(data);
+          // Optional: Scroll to the ticket 
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }}
+      />
     </main>
   );
 }
