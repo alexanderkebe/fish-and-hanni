@@ -236,9 +236,8 @@ export default function Home() {
                   />
                 </div>
                 
-                {/* Standalone Directions CTA */}
                 <a 
-                  href="https://www.google.com/maps/dir/?api=1&destination=Gerji+Mebrathail+Maryam+Orthodox+Church,+Addis+Ababa" 
+                  href="https://www.google.com/maps/dir/?api=1&destination=Gerji+St.+Mariam+Church,+Addis+Ababa" 
                   target="_blank" 
                   rel="noreferrer" 
                   className="bg-white hover:bg-surface-container-low border border-outline-variant/30 text-on-surface py-4 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all hover:-translate-y-1 hover:shadow-md"
