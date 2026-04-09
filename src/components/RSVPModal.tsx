@@ -61,8 +61,12 @@ export default function RSVPModal({ isOpen, onClose, onSuccess }: RSVPModalProps
         </button>
 
         <div className="mb-8 text-center mt-2">
-          <h2 className="text-3xl font-cursive text-primary-container mb-2">RSVP</h2>
-          <p className="text-sm font-label uppercase tracking-widest text-outline">Confirm Your Attendance</p>
+          <h2 className="text-3xl font-cursive text-primary-container mb-3">Generate Ticket</h2>
+          <div className="bg-primary-container/10 border border-primary-container/20 rounded-xl p-3">
+              <p className="text-xs font-notoSerif text-on-surface-variant leading-relaxed">
+                  We need your details strictly to organize catering and reserve your seat. This will act as your mandatory pass at the gate.
+              </p>
+          </div>
         </div>
 
         {step === 'form' && (
@@ -114,10 +118,10 @@ export default function RSVPModal({ isOpen, onClose, onSuccess }: RSVPModalProps
 
             <button 
               type="submit"
-              className="w-full gold-gradient-btn text-white font-semibold uppercase tracking-widest text-sm py-4 rounded-2xl shadow-md hover:shadow-lg transition-transform hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2"
+              className="w-full gold-gradient-btn text-white font-semibold uppercase tracking-widest text-[13px] py-4 rounded-2xl shadow-md hover:shadow-lg transition-transform hover:-translate-y-0.5 mt-4 flex items-center justify-center gap-2"
             >
-              <span className="material-symbols-outlined text-lg">check_circle</span>
-              Confirm RSVP
+              <span className="material-symbols-outlined text-lg">qr_code</span>
+              Generate Digital Ticket
             </button>
           </form>
         )}

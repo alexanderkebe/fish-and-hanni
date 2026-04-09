@@ -311,17 +311,19 @@ export default function Home() {
       <section className="px-6 py-20 md:py-32 flex flex-col items-center">
         {!ticket ? (
           <div className="glass-card p-10 md:p-16 rounded-[48px] shadow-sm md:shadow-lg flex flex-col items-center max-w-sm md:max-w-md w-full text-center transition-all duration-700">
-            <span className="material-symbols-outlined text-5xl text-primary-container mb-6">local_activity</span>
-            <h2 className="text-3xl md:text-4xl font-cursive text-primary mb-3">Join Us</h2>
-            <p className="text-sm md:text-base font-notoSerif italic text-on-surface-variant mb-8">
-              Please confirm your attendance so we can save your seat.
-            </p>
+            <span className="material-symbols-outlined text-5xl text-primary-container mb-6">workspace_premium</span>
+            <h2 className="text-3xl md:text-3xl font-cursive text-primary mb-4 leading-tight">Your Digital Pass</h2>
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 mb-8">
+                <p className="text-sm md:text-sm font-notoSerif italic text-on-surface-variant font-medium">
+                  We are organizing dedicated seats, food, and drinks for everyone. You <strong className="text-primary font-bold">must</strong> register below to generate your unique Entrance Ticket for the gate!
+                </p>
+            </div>
             <button 
               onClick={() => setRSVPModalOpen(true)}
-              className="w-full gold-gradient-btn text-white py-5 px-8 rounded-full text-sm font-label uppercase tracking-widest flex items-center justify-center gap-3 transition-transform hover:scale-[1.03] shadow-lg"
+              className="w-full gold-gradient-btn text-white py-5 px-8 flex items-center justify-center gap-3 transition-transform hover:scale-[1.03] rounded-full text-sm font-label uppercase tracking-widest shadow-[0_4px_25px_rgba(202,152,73,0.4)] animate-pulse"
             >
-              RSVP Now
-              <span className="material-symbols-outlined">arrow_forward</span>
+              <span className="material-symbols-outlined">confirmation_number</span>
+              Get My Ticket Now
             </button>
           </div>
         ) : (
