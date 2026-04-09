@@ -8,7 +8,7 @@ function VerificationContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  const [status, setStatus] = useState<'loading' | 'valid' | 'invalid' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'valid' | 'invalid' | 'error' | 'already_checked_in' | 'checking_in'>('loading');
   const [attendee, setAttendee] = useState<any>(null);
 
   useEffect(() => {
@@ -31,7 +31,11 @@ function VerificationContent() {
         }
 
         setAttendee(data);
-        setStatus('valid');
+        if (data.status === 'checked_in') {
+          setStatus('already_checked_in');
+        } else {
+          setStatus('valid');
+        }
       } catch (err) {
         setStatus('error');
       }
@@ -71,6 +75,23 @@ function VerificationContent() {
     );
   }
 
+  if (status === 'already_checked_in') {
+    return (
+      <div className="flex flex-col items-center">
+        <span className="material-symbols-outlined text-6xl text-error mb-4">warning</span>
+        <h2 className="text-2xl font-bold text-error mb-2 text-center leading-tight">Already<br/>Checked In!</h2>
+        <p className="text-sm text-center text-on-surface-variant bg-error-container text-on-error-container p-3 rounded-xl mt-2 mb-6 shadow-sm border border-error/20 inline-block">
+          This QR code has ALREADY been used to enter the venue. This could be a forwarded or duplicate ticket.
+        </p>
+        <div className="bg-surface-container/50 w-full p-4 rounded-2xl flex flex-col items-center">
+            <span className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1">Registered To</span>
+            <p className="font-bold text-lg">{attendee?.full_name}</p>
+            <p className="text-xs text-outline font-medium">{attendee?.relation}</p>
+        </div>
+      </div>
+    );
+  }
+
   // VALID STATE
   return (
     <div className="flex flex-col items-center relative z-10 w-full animate-in zoom-in duration-500">
@@ -99,14 +120,36 @@ function VerificationContent() {
       </div>
       
       <button 
-        className="w-full bg-surface-container hover:bg-surface-variant text-on-surface py-3 rounded-full text-sm font-semibold transition-colors flex justify-center gap-2"
-        onClick={() => {
-            // Check in logic could go here
-            alert("Guest checked in!");
+        disabled={status === 'checking_in'}
+        className={`w-full py-4 rounded-full text-sm font-bold uppercase tracking-widest transition-all hover:-translate-y-0.5 shadow-md flex justify-center items-center gap-2 ${
+            status === 'checking_in' ? 'bg-surface-variant text-outline' : 'gold-gradient-btn text-white'
+        }`}
+        onClick={async () => {
+          setStatus('checking_in');
+          const { error } = await supabase
+            .from('attendees')
+            .update({ status: 'checked_in' })
+            .eq('id', attendee.id);
+            
+          if (error) {
+            alert("Database Error: " + error.message + "\n\nDid you run the SQL Update Policy?");
+            setStatus('valid');
+            return;
+          }
+          setStatus('already_checked_in');
         }}
       >
-        <span className="material-symbols-outlined">how_to_reg</span>
-        Check In Guest
+        {status === 'checking_in' ? (
+            <div className="flex items-center gap-2">
+                <div className="w-5 h-5 border-2 border-outline border-t-transparent rounded-full animate-spin"></div>
+                Checking in...
+            </div>
+        ) : (
+            <>
+                <span className="material-symbols-outlined text-lg">how_to_reg</span>
+                Check In Guest
+            </>
+        )}
       </button>
     </div>
   );
