@@ -237,7 +237,7 @@ export default function Home() {
                 </div>
                 
                 <a 
-                  href="https://www.google.com/maps/dir/?api=1&destination=Gerji+St.+Mariam+Church,+Addis+Ababa" 
+                  href="https://maps.app.goo.gl/WaQbBuPyDS3JYWNEA"
                   target="_blank" 
                   rel="noreferrer" 
                   className="bg-white hover:bg-surface-container-low border border-outline-variant/30 text-on-surface py-4 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all hover:-translate-y-1 hover:shadow-md"
