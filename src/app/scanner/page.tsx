@@ -46,7 +46,7 @@ export default function ScannerPage() {
             <Scanner 
               onScan={handleScan} 
               formats={['qr_code']}
-              onError={(error) => console.log("Scanner minor error:", error?.message)}
+              onError={(error: any) => console.log("Scanner minor error:", error?.message)}
             />
           ) : (
             <div className="text-primary-container animate-pulse flex flex-col items-center">
