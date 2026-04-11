@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from 'react';
  *
  * ⚠️  Change AUDIO_SRC to match the exact filename you placed in /public.
  */
-const AUDIO_SRC = '/soundtrack.mp3'; // ← update this if your file has a different name
+const AUDIO_SRC = '/soundtrack.m4a';
 
 export default function MusicPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
