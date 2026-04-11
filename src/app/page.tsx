@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import RSVPModal from "@/components/RSVPModal";
+import RSVPForm from "@/components/RSVPForm";
 
 function Countdown() {
   const [mounted, setMounted] = useState(false);
@@ -52,15 +52,14 @@ function Countdown() {
 }
 
 export default function Home() {
-  const [isRSVPModalOpen, setRSVPModalOpen] = useState(false);
-  const [ticket, setTicket] = useState<{id: string, qrUrl: string} | null>(null);
+  const [ticket, setTicket] = useState<{ id: string; qrUrl: string } | null>(null);
 
-  const scrollToTicket = () => {
-    document.getElementById("rsvp-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const scrollToRsvp = () => {
+    document.getElementById("rsvp-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
-    <main className="overflow-x-hidden pb-28 md:pb-32 selection:bg-primary-fixed selection:text-on-primary-fixed-variant">
+    <main className="overflow-x-hidden pb-24 selection:bg-primary-fixed selection:text-on-primary-fixed-variant">
       
       {/* 1. Hero Section */}
       <section className="relative h-screen w-full overflow-hidden flex flex-col items-center justify-end">
@@ -336,21 +335,30 @@ export default function Home() {
       {/* 6. RSVP & QR Code Section */}
       <section id="rsvp-section" className="px-6 py-20 md:py-32 flex flex-col items-center scroll-mt-24">
         {!ticket ? (
-          <div className="glass-card p-10 md:p-16 rounded-[48px] shadow-sm md:shadow-lg flex flex-col items-center max-w-sm md:max-w-md w-full text-center transition-all duration-700">
-            <span className="material-symbols-outlined text-5xl text-primary-container mb-6">workspace_premium</span>
-            <h2 className="text-3xl md:text-3xl font-cursive text-primary mb-4 leading-tight">Your Digital Pass</h2>
-            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 mb-8">
-                <p className="text-sm md:text-sm font-notoSerif italic text-on-surface-variant font-medium">
-                  We are organizing dedicated seats, food, and drinks for everyone. You <strong className="text-primary font-bold">must</strong> register below to generate your unique Entrance Ticket for the gate!
+          <div className="glass-card p-8 md:p-12 rounded-[40px] shadow-sm md:shadow-lg flex flex-col items-stretch max-w-md w-full transition-all duration-700">
+            <div className="text-center mb-8">
+              <span
+                className="material-symbols-outlined text-5xl md:text-6xl text-primary-container mb-4 inline-block"
+                style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48" }}
+              >
+                local_activity
+              </span>
+              <h2 className="text-3xl md:text-4xl font-cursive text-primary mb-3 leading-tight">Your Digital Pass</h2>
+              <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 text-left">
+                <p className="text-sm font-notoSerif italic text-on-surface-variant font-medium leading-relaxed">
+                  We are organizing dedicated seats, food, and drinks for everyone. You{" "}
+                  <strong className="text-primary font-bold">must</strong> register to generate your unique entrance ticket for the gate.
                 </p>
+              </div>
             </div>
-            <button 
-              onClick={() => setRSVPModalOpen(true)}
-              className="w-full gold-gradient-btn text-white py-5 px-8 flex items-center justify-center gap-3 transition-transform hover:scale-[1.03] rounded-full text-sm font-label uppercase tracking-widest shadow-[0_4px_25px_rgba(202,152,73,0.4)] animate-pulse"
-            >
-              <span className="material-symbols-outlined">confirmation_number</span>
-              Get My Ticket Now
-            </button>
+            <RSVPForm
+              onSuccess={(data) => {
+                setTicket(data);
+                window.requestAnimationFrame(() => {
+                  document.getElementById("rsvp-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                });
+              }}
+            />
           </div>
         ) : (
           <div className="glass-card p-10 md:p-16 rounded-[48px] shadow-sm md:shadow-lg flex flex-col items-center max-w-xs md:max-w-md w-full text-center hover:scale-[1.02] transition-transform duration-700 animate-in fade-in zoom-in">
@@ -376,40 +384,34 @@ export default function Home() {
         )}
       </section>
 
-      <RSVPModal 
-        isOpen={isRSVPModalOpen}
-        onClose={() => setRSVPModalOpen(false)}
-        onSuccess={(data) => {
-          setTicket(data);
-          // Optional: Scroll to the ticket 
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }}
-      />
-
-      {/* Sticky RSVP — always visible (modal overlay z-50 sits above) */}
-      <div
-        className="fixed inset-x-0 bottom-0 z-40 flex justify-center pointer-events-none px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-surface/95 via-surface/80 to-transparent"
-        aria-hidden={isRSVPModalOpen}
-      >
+      {/* Sticky RSVP — compact, bottom-right */}
+      <div className="fixed bottom-4 right-4 z-40 pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)]">
         <button
           type="button"
-          onClick={() => (ticket ? scrollToTicket() : setRSVPModalOpen(true))}
-          className="pointer-events-auto gold-gradient-btn text-white rounded-full px-8 py-3.5 md:px-10 md:py-4 shadow-[0_8px_32px_rgba(119,90,25,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-transform flex flex-col items-center gap-0.5 min-w-[200px] max-w-[min(100%,20rem)]"
+          onClick={() => scrollToRsvp()}
+          className="gold-gradient-btn text-white rounded-full pl-2.5 pr-3.5 py-2 shadow-[0_6px_20px_rgba(119,90,25,0.4)] hover:scale-[1.03] active:scale-[0.97] transition-transform flex items-center gap-2 max-w-[11.5rem]"
+          aria-label={ticket ? "View your digital pass" : "RSVP — scroll to registration form"}
         >
-          {ticket ? (
-            <>
-              <span className="font-label text-xs md:text-sm uppercase tracking-[0.2em] flex items-center gap-2">
-                <span className="material-symbols-outlined text-lg">confirmation_number</span>
-                Your digital pass
-              </span>
-              <span className="text-[11px] md:text-xs font-notoSerif italic text-white/90">View your ticket</span>
-            </>
-          ) : (
-            <>
-              <span className="font-label text-sm md:text-base uppercase tracking-[0.25em]">RSVP Now</span>
-              <span className="text-[11px] md:text-xs font-notoSerif italic text-white/90">Confirm Attendance</span>
-            </>
-          )}
+          <span
+            className="material-symbols-outlined text-[28px] shrink-0 leading-none"
+            style={{ fontVariationSettings: "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 28" }}
+            aria-hidden
+          >
+            local_activity
+          </span>
+          <span className="flex flex-col items-start text-left leading-tight py-0.5">
+            {ticket ? (
+              <>
+                <span className="font-label text-[10px] uppercase tracking-wider">Pass</span>
+                <span className="text-[11px] font-notoSerif italic text-white/95">View ticket</span>
+              </>
+            ) : (
+              <>
+                <span className="font-label text-[10px] uppercase tracking-wider">RSVP</span>
+                <span className="text-[11px] font-notoSerif italic text-white/95">Confirm</span>
+              </>
+            )}
+          </span>
         </button>
       </div>
     </main>
