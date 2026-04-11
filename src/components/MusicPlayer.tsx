@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 /**
  * MusicPlayer — ambient wedding soundtrack
@@ -14,12 +15,17 @@ import { useEffect, useRef, useState } from 'react';
 const AUDIO_SRC = '/soundtrack.m4a';
 
 export default function MusicPlayer() {
+  const pathname = usePathname();
+  const isDisabled = pathname?.startsWith('/scanner') || pathname?.startsWith('/admin') || pathname?.startsWith('/verify');
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [ready, setReady] = useState(false);
 
   /* ── Bootstrap audio on mount ── */
   useEffect(() => {
+    if (isDisabled) return;
+
     const audio = new Audio(AUDIO_SRC);
     audio.loop = true;
     audio.volume = 0;        // start silent so autoplay is allowed
@@ -69,7 +75,7 @@ export default function MusicPlayer() {
     }
   };
 
-  if (!ready) return null;
+  if (isDisabled || !ready) return null;
 
   return (
     <>
