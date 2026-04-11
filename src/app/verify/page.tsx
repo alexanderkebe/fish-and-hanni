@@ -3,13 +3,14 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { type AttendeeRow, getPlusOneInfo, getReceivingNotes } from "@/lib/attendeeDisplay";
 
 function VerificationContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
   const [status, setStatus] = useState<'loading' | 'valid' | 'invalid' | 'error' | 'already_checked_in' | 'checking_in'>('loading');
-  const [attendee, setAttendee] = useState<any>(null);
+  const [attendee, setAttendee] = useState<AttendeeRow | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -83,16 +84,25 @@ function VerificationContent() {
         <p className="text-sm text-center text-on-surface-variant bg-error-container text-on-error-container p-3 rounded-xl mt-2 mb-6 shadow-sm border border-error/20 inline-block">
           This QR code has ALREADY been used to enter the venue. This could be a forwarded or duplicate ticket.
         </p>
-        <div className="bg-surface-container/50 w-full p-4 rounded-2xl flex flex-col items-center">
+        <div className="bg-surface-container/50 w-full p-4 rounded-2xl flex flex-col items-center text-center">
             <span className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1">Registered To</span>
             <p className="font-bold text-lg">{attendee?.full_name}</p>
             <p className="text-xs text-outline font-medium">{attendee?.relation}</p>
+            {attendee && getPlusOneInfo(attendee).hasPlusOne && (
+              <p className="text-xs text-on-surface-variant mt-2">
+                +1: <span className="font-semibold text-primary">{getPlusOneInfo(attendee).guestName || "Guest"}</span>
+              </p>
+            )}
         </div>
       </div>
     );
   }
 
   // VALID STATE
+  if (!attendee) return null;
+  const plus = getPlusOneInfo(attendee);
+  const receiving = getReceivingNotes(attendee);
+
   return (
     <div className="flex flex-col items-center relative z-10 w-full animate-in zoom-in duration-500">
       <div className="bg-primary-container/20 w-24 h-24 rounded-full flex items-center justify-center mb-6">
@@ -105,17 +115,33 @@ function VerificationContent() {
       </h2>
       
       <div className="w-full space-y-3 bg-surface-container/50 p-4 rounded-2xl mb-8">
-        <div className="flex justify-between items-center pb-2 border-b border-outline-variant/20">
-          <span className="text-xs font-semibold uppercase text-on-surface-variant">Relation</span>
-          <span className="text-sm font-bold text-primary">{attendee.relation}</span>
+        <div className="flex justify-between items-center gap-2 pb-2 border-b border-outline-variant/20">
+          <span className="text-xs font-semibold uppercase text-on-surface-variant shrink-0">Relation</span>
+          <span className="text-sm font-bold text-primary text-right">{attendee.relation}</span>
         </div>
-        <div className="flex justify-between items-center pb-2 border-b border-outline-variant/20">
-          <span className="text-xs font-semibold uppercase text-on-surface-variant">Phone</span>
-          <span className="text-sm font-medium text-on-surface">{attendee.phone || 'N/A'}</span>
+        <div className="flex justify-between items-center gap-2 pb-2 border-b border-outline-variant/20">
+          <span className="text-xs font-semibold uppercase text-on-surface-variant shrink-0">Phone</span>
+          <span className="text-sm font-medium text-on-surface text-right">{attendee.phone || "N/A"}</span>
         </div>
-        <div className="flex justify-between items-center">
+        {plus.hasPlusOne && (
+          <div className="flex justify-between items-start gap-2 pb-2 border-b border-outline-variant/20">
+            <span className="text-xs font-semibold uppercase text-on-surface-variant shrink-0">Plus-one</span>
+            <span className="text-sm font-medium text-on-surface text-right">
+              {plus.guestName || "Guest"}
+            </span>
+          </div>
+        )}
+        {receiving && (
+          <div className="flex flex-col gap-1 pt-0.5">
+            <span className="text-xs font-semibold uppercase text-on-surface-variant">Receiving / seating</span>
+            <span className="text-xs text-on-surface leading-relaxed whitespace-pre-wrap">{receiving}</span>
+          </div>
+        )}
+        <div className="flex justify-between items-center pt-1">
           <span className="text-xs font-semibold uppercase text-on-surface-variant">ID</span>
-          <span className="text-[10px] font-mono text-outline truncate max-w-[150px]">{attendee.id.substring(0, 8)}...</span>
+          <span className="text-[10px] font-mono text-outline truncate max-w-[150px]">
+            {attendee.id.substring(0, 8)}...
+          </span>
         </div>
       </div>
       

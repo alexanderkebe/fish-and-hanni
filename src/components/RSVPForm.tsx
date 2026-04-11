@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { buildTicketQrUrl } from "@/lib/weddingTicket";
 
 interface RSVPFormProps {
   onSuccess: (attendeeData: { id: string; qrUrl: string }) => void;
@@ -50,8 +51,7 @@ export default function RSVPForm({ onSuccess }: RSVPFormProps) {
         throw new Error(data.error || "Failed to submit RSVP");
       }
 
-      const verifyUrl = `${window.location.origin}/verify?id=${data.attendee.id}`;
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(verifyUrl)}&color=775a19&bgcolor=ffffff`;
+      const qrUrl = buildTicketQrUrl(window.location.origin, data.attendee.id);
 
       onSuccess({ id: data.attendee.id, qrUrl });
       setStep("form");
@@ -80,15 +80,18 @@ export default function RSVPForm({ onSuccess }: RSVPFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 w-full text-left">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-5 w-full min-w-0 max-w-full text-left box-border"
+    >
       {error && (
         <div className="bg-error-container text-on-error-container text-xs p-3 rounded-xl border border-error/20">
           {error}
         </div>
       )}
 
-      <div>
-        <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 ml-1">
+      <div className="min-w-0">
+        <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 ml-1 break-words">
           Full Name
         </label>
         <input
@@ -96,12 +99,12 @@ export default function RSVPForm({ onSuccess }: RSVPFormProps) {
           value={formData.fullName}
           onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
           placeholder="E.g. Abel Tesfaye"
-          className="w-full bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-5 py-4 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container"
+          className="w-full min-w-0 max-w-full box-border bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-4 sm:px-5 py-4 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container"
         />
       </div>
 
-      <div>
-        <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 ml-1">
+      <div className="min-w-0">
+        <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 ml-1 break-words">
           Phone Number (Optional)
         </label>
         <input
@@ -109,18 +112,18 @@ export default function RSVPForm({ onSuccess }: RSVPFormProps) {
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           placeholder="+251 9..."
-          className="w-full bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-5 py-4 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container"
+          className="w-full min-w-0 max-w-full box-border bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-4 sm:px-5 py-4 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container"
         />
       </div>
 
-      <div>
-        <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 ml-1">
+      <div className="min-w-0">
+        <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 ml-1 break-words">
           Relation to Couple
         </label>
         <select
           value={formData.relation}
           onChange={(e) => setFormData({ ...formData, relation: e.target.value })}
-          className="w-full bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-5 py-4 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container appearance-none"
+          className="w-full min-w-0 max-w-full box-border bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-4 sm:px-5 py-4 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container appearance-none"
         >
           <option value="" disabled>
             Select relation...
@@ -134,38 +137,46 @@ export default function RSVPForm({ onSuccess }: RSVPFormProps) {
         </select>
       </div>
 
-      <fieldset className="space-y-3 rounded-2xl border border-outline-variant/25 bg-surface-container/50 p-4">
-        <legend className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant px-1">
+      <div
+        role="group"
+        aria-label="Plus-one"
+        className="min-w-0 w-full max-w-full overflow-hidden rounded-2xl border border-outline-variant/25 bg-surface-container/50 p-3 sm:p-4 box-border"
+      >
+        <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 break-words">
           Will you bring a plus-one?
-        </legend>
-        <p className="text-[11px] text-on-surface-variant leading-relaxed -mt-1 mb-2">
+        </p>
+        <p className="text-[11px] text-on-surface-variant leading-relaxed mb-3 break-words">
           We plan seats and meals per person. Let us know if someone is coming with you.
         </p>
-        <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-3 cursor-pointer group">
+        <div className="flex flex-col gap-2.5 min-w-0">
+          <label className="flex items-start gap-3 cursor-pointer group min-w-0">
             <input
               type="radio"
               name="plusOne"
               checked={!formData.plusOne}
               onChange={() => setFormData({ ...formData, plusOne: false, plusOneName: "" })}
-              className="size-4 accent-primary-container shrink-0"
+              className="size-4 accent-primary-container shrink-0 mt-0.5"
             />
-            <span className="text-sm font-medium text-on-surface">Just me</span>
+            <span className="text-sm font-medium text-on-surface min-w-0 flex-1 break-words leading-snug">
+              Just me
+            </span>
           </label>
-          <label className="flex items-center gap-3 cursor-pointer group">
+          <label className="flex items-start gap-3 cursor-pointer group min-w-0">
             <input
               type="radio"
               name="plusOne"
               checked={formData.plusOne}
               onChange={() => setFormData({ ...formData, plusOne: true })}
-              className="size-4 accent-primary-container shrink-0"
+              className="size-4 accent-primary-container shrink-0 mt-0.5"
             />
-            <span className="text-sm font-medium text-on-surface">Me + one guest</span>
+            <span className="text-sm font-medium text-on-surface min-w-0 flex-1 break-words leading-snug">
+              Me + one guest
+            </span>
           </label>
         </div>
         {formData.plusOne && (
-          <div className="pt-2">
-            <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 ml-1">
+          <div className="pt-3 mt-1 border-t border-outline-variant/20 min-w-0">
+            <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 break-words">
               Plus-one full name
             </label>
             <input
@@ -173,17 +184,17 @@ export default function RSVPForm({ onSuccess }: RSVPFormProps) {
               value={formData.plusOneName}
               onChange={(e) => setFormData({ ...formData, plusOneName: e.target.value })}
               placeholder="Guest's name as it should appear"
-              className="w-full bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-5 py-3.5 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container text-sm"
+              className="w-full min-w-0 max-w-full box-border bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-4 sm:px-5 py-3.5 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container text-sm"
             />
           </div>
         )}
-      </fieldset>
+      </div>
 
-      <div>
-        <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 ml-1">
+      <div className="min-w-0">
+        <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 ml-1 break-words">
           Receiving &amp; seating (optional)
         </label>
-        <p className="text-[11px] text-on-surface-variant mb-2 leading-relaxed">
+        <p className="text-[11px] text-on-surface-variant mb-2 leading-relaxed break-words">
           Dietary needs, accessibility, children, or how you&apos;d like to be seated with family — anything that helps us host you.
         </p>
         <textarea
@@ -191,13 +202,13 @@ export default function RSVPForm({ onSuccess }: RSVPFormProps) {
           onChange={(e) => setFormData({ ...formData, receivingNotes: e.target.value })}
           placeholder="E.g. vegetarian meal for my guest, or seated near the bride's family…"
           rows={3}
-          className="w-full resize-y min-h-[88px] bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-5 py-4 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container text-sm"
+          className="w-full min-w-0 max-w-full box-border resize-y min-h-[88px] bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-4 sm:px-5 py-4 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container text-sm"
         />
       </div>
 
       <button
         type="submit"
-        className="w-full gold-gradient-btn text-white font-semibold uppercase tracking-widest text-[13px] py-4 rounded-2xl shadow-md hover:shadow-lg transition-transform hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2"
+        className="w-full min-w-0 max-w-full box-border gold-gradient-btn text-white font-semibold uppercase tracking-widest text-[13px] py-4 rounded-2xl shadow-md hover:shadow-lg transition-transform hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2 flex-wrap"
       >
         <span
           className="material-symbols-outlined text-[22px]"

@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  buildTicketQrUrl,
+  clearStoredTicketId,
+  persistTicketId,
+  readStoredTicketId,
+} from "@/lib/weddingTicket";
+import { supabase } from "@/lib/supabase";
 import RSVPForm from "@/components/RSVPForm";
 
 function Countdown() {
@@ -95,6 +102,57 @@ function RsvpScrollCta({
 
 export default function Home() {
   const [ticket, setTicket] = useState<{ id: string; qrUrl: string } | null>(null);
+  /** False until we finish reading localStorage + verifying id with the database */
+  const [ticketHydrated, setTicketHydrated] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const stored = readStoredTicketId();
+      if (!stored) {
+        if (!cancelled) setTicketHydrated(true);
+        return;
+      }
+      try {
+        // Same path as /verify: browser Supabase client (RLS often allows this when server route does not).
+        const { data, error } = await supabase
+          .from("attendees")
+          .select("id")
+          .eq("id", stored)
+          .maybeSingle();
+
+        if (cancelled) return;
+
+        if (error) {
+          console.error("[ticket restore]", error.message);
+          const res = await fetch(`/api/rsvp/ticket?id=${encodeURIComponent(stored)}`);
+          if (!cancelled && res.ok) {
+            const j = (await res.json()) as { id: string };
+            setTicket({
+              id: j.id,
+              qrUrl: buildTicketQrUrl(window.location.origin, j.id),
+            });
+          } else if (!cancelled) {
+            clearStoredTicketId();
+          }
+        } else if (data?.id) {
+          setTicket({
+            id: data.id,
+            qrUrl: buildTicketQrUrl(window.location.origin, data.id),
+          });
+        } else {
+          clearStoredTicketId();
+        }
+      } catch {
+        if (!cancelled) clearStoredTicketId();
+      } finally {
+        if (!cancelled) setTicketHydrated(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const scrollToRsvp = () => {
     document.getElementById("rsvp-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -122,7 +180,7 @@ export default function Home() {
           <span className="text-on-surface/90 font-label tracking-[0.3em] uppercase text-xs">You're Invited</span>
           <h1 className="text-6xl md:text-8xl font-cursive text-primary-container drop-shadow-lg">Fish &amp; Hanni</h1>
           <p className="text-on-surface-variant font-notoSerif italic text-xl">The Union of Two Souls</p>
-          <RsvpScrollCta hasTicket={!!ticket} onScrollToRsvp={scrollToRsvp} variant="hero" />
+          <RsvpScrollCta hasTicket={ticketHydrated && !!ticket} onScrollToRsvp={scrollToRsvp} variant="hero" />
         </div>
       </section>
 
@@ -185,7 +243,7 @@ export default function Home() {
         <p className="text-xs font-label uppercase tracking-[0.2em] text-outline text-center max-w-sm">
           Save your seat &amp; get your entrance pass
         </p>
-        <RsvpScrollCta hasTicket={!!ticket} onScrollToRsvp={scrollToRsvp} variant="mid" />
+        <RsvpScrollCta hasTicket={ticketHydrated && !!ticket} onScrollToRsvp={scrollToRsvp} variant="mid" />
       </div>
 
       {/* Wrapping Calendar and Map in a side-by-side Grid on Desktop */}
@@ -389,13 +447,20 @@ export default function Home() {
         <p className="text-on-surface-variant text-sm text-center max-w-md leading-relaxed">
           One quick RSVP helps us plan food, seating, and your digital ticket for the gate.
         </p>
-        <RsvpScrollCta hasTicket={!!ticket} onScrollToRsvp={scrollToRsvp} variant="prefooter" />
+        <RsvpScrollCta hasTicket={ticketHydrated && !!ticket} onScrollToRsvp={scrollToRsvp} variant="prefooter" />
       </div>
 
       {/* 6. RSVP & QR Code Section */}
       <section id="rsvp-section" className="px-6 py-20 md:py-32 flex flex-col items-center scroll-mt-24">
-        {!ticket ? (
-          <div className="glass-card p-8 md:p-12 rounded-[40px] shadow-sm md:shadow-lg flex flex-col items-stretch max-w-md w-full transition-all duration-700">
+        {!ticketHydrated ? (
+          <div className="glass-card p-12 rounded-[40px] shadow-sm md:shadow-lg flex flex-col items-center justify-center max-w-md w-full min-h-[200px] gap-4">
+            <div className="w-10 h-10 border-4 border-primary-container border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs font-label uppercase tracking-widest text-on-surface-variant text-center">
+              Loading your saved pass…
+            </p>
+          </div>
+        ) : !ticket ? (
+          <div className="glass-card p-6 sm:p-8 md:p-12 rounded-[40px] shadow-sm md:shadow-lg flex flex-col items-stretch max-w-md w-full min-w-0 overflow-hidden box-border transition-all duration-700">
             <div className="text-center mb-8">
               <span
                 className="material-symbols-outlined text-5xl md:text-6xl text-primary-container mb-4 inline-block"
@@ -413,6 +478,7 @@ export default function Home() {
             </div>
             <RSVPForm
               onSuccess={(data) => {
+                persistTicketId(String(data.id));
                 setTicket(data);
                 window.requestAnimationFrame(() => {
                   document.getElementById("rsvp-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -440,6 +506,9 @@ export default function Home() {
             <p className="text-sm font-notoSerif italic text-on-surface-variant mt-6">
               Please present this QR code at the entrance.
             </p>
+            <p className="text-[11px] text-outline text-center mt-4 max-w-xs leading-relaxed">
+              This ticket is saved on this browser. One device keeps one pass—screenshot or add to home screen if you need a backup.
+            </p>
           </div>
         )}
       </section>
@@ -450,7 +519,7 @@ export default function Home() {
           type="button"
           onClick={() => scrollToRsvp()}
           className="gold-gradient-btn text-white rounded-full pl-2.5 pr-3.5 py-2 shadow-[0_6px_20px_rgba(119,90,25,0.4)] hover:scale-[1.03] active:scale-[0.97] transition-transform flex items-center gap-2 max-w-[11.5rem]"
-          aria-label={ticket ? "View your digital pass" : "RSVP — scroll to registration form"}
+          aria-label={ticketHydrated && ticket ? "View your digital pass" : "RSVP — scroll to registration form"}
         >
           <span
             className="material-symbols-outlined text-[28px] shrink-0 leading-none"
@@ -460,7 +529,7 @@ export default function Home() {
             local_activity
           </span>
           <span className="flex flex-col items-start text-left leading-tight py-0.5">
-            {ticket ? (
+            {ticketHydrated && ticket ? (
               <>
                 <span className="font-label text-[10px] uppercase tracking-wider">Pass</span>
                 <span className="text-[11px] font-notoSerif italic text-white/95">View ticket</span>

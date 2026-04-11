@@ -21,28 +21,23 @@ export async function POST(request: Request) {
       )
     }
 
-    const noteLines: string[] = []
-    if (hasPlusOne) {
-      noteLines.push(`Plus-one: ${String(plusOneName).trim()}`)
-    } else {
-      noteLines.push('Plus-one: No (guest only)')
-    }
-    if (receivingNotes && String(receivingNotes).trim() !== '') {
-      noteLines.push(`Receiving / seating / meals: ${String(receivingNotes).trim()}`)
-    }
-    const notes = noteLines.length > 0 ? noteLines.join('\n') : null
+    const receiving = receivingNotes && String(receivingNotes).trim() !== ''
+      ? String(receivingNotes).trim()
+      : null
 
-    // Requires a nullable `notes` text column on `attendees` in Supabase.
+    // Columns: plus_one, plus_one_name, receiving_notes — add via supabase/migrations/*.sql
     const { data, error } = await supabase
       .from('attendees')
       .insert([
-        { 
-          full_name: fullName, 
-          phone: phone || null, 
+        {
+          full_name: fullName,
+          phone: phone || null,
           relation: relation,
           status: 'attending',
-          notes,
-        }
+          plus_one: hasPlusOne,
+          plus_one_name: hasPlusOne ? String(plusOneName).trim() : null,
+          receiving_notes: receiving,
+        },
       ])
       .select()
       .single()
