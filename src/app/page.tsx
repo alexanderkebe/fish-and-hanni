@@ -55,8 +55,12 @@ export default function Home() {
   const [isRSVPModalOpen, setRSVPModalOpen] = useState(false);
   const [ticket, setTicket] = useState<{id: string, qrUrl: string} | null>(null);
 
+  const scrollToTicket = () => {
+    document.getElementById("rsvp-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
   return (
-    <main className="overflow-x-hidden pb-12 selection:bg-primary-fixed selection:text-on-primary-fixed-variant">
+    <main className="overflow-x-hidden pb-28 md:pb-32 selection:bg-primary-fixed selection:text-on-primary-fixed-variant">
       
       {/* 1. Hero Section */}
       <section className="relative h-screen w-full overflow-hidden flex flex-col items-center justify-end">
@@ -330,7 +334,7 @@ export default function Home() {
       </section>
 
       {/* 6. RSVP & QR Code Section */}
-      <section className="px-6 py-20 md:py-32 flex flex-col items-center">
+      <section id="rsvp-section" className="px-6 py-20 md:py-32 flex flex-col items-center scroll-mt-24">
         {!ticket ? (
           <div className="glass-card p-10 md:p-16 rounded-[48px] shadow-sm md:shadow-lg flex flex-col items-center max-w-sm md:max-w-md w-full text-center transition-all duration-700">
             <span className="material-symbols-outlined text-5xl text-primary-container mb-6">workspace_premium</span>
@@ -381,6 +385,33 @@ export default function Home() {
           window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }}
       />
+
+      {/* Sticky RSVP — always visible (modal overlay z-50 sits above) */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-40 flex justify-center pointer-events-none px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-surface/95 via-surface/80 to-transparent"
+        aria-hidden={isRSVPModalOpen}
+      >
+        <button
+          type="button"
+          onClick={() => (ticket ? scrollToTicket() : setRSVPModalOpen(true))}
+          className="pointer-events-auto gold-gradient-btn text-white rounded-full px-8 py-3.5 md:px-10 md:py-4 shadow-[0_8px_32px_rgba(119,90,25,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-transform flex flex-col items-center gap-0.5 min-w-[200px] max-w-[min(100%,20rem)]"
+        >
+          {ticket ? (
+            <>
+              <span className="font-label text-xs md:text-sm uppercase tracking-[0.2em] flex items-center gap-2">
+                <span className="material-symbols-outlined text-lg">confirmation_number</span>
+                Your digital pass
+              </span>
+              <span className="text-[11px] md:text-xs font-notoSerif italic text-white/90">View your ticket</span>
+            </>
+          ) : (
+            <>
+              <span className="font-label text-sm md:text-base uppercase tracking-[0.25em]">RSVP Now</span>
+              <span className="text-[11px] md:text-xs font-notoSerif italic text-white/90">Confirm Attendance</span>
+            </>
+          )}
+        </button>
+      </div>
     </main>
   );
 }
