@@ -8,13 +8,24 @@ interface RSVPFormProps {
 
 export default function RSVPForm({ onSuccess }: RSVPFormProps) {
   const [step, setStep] = useState<"form" | "loading">("form");
-  const [formData, setFormData] = useState({ fullName: "", phone: "", relation: "" });
+  const [formData, setFormData] = useState({
+    fullName: "",
+    phone: "",
+    relation: "",
+    plusOne: false,
+    plusOneName: "",
+    receivingNotes: "",
+  });
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!formData.fullName || !formData.relation) {
       setError("Please fill out your name and relation to the couple.");
+      return;
+    }
+    if (formData.plusOne && !formData.plusOneName.trim()) {
+      setError("Please enter your plus-one's name, or choose 'Just me' if you're attending alone.");
       return;
     }
     setError("");
@@ -24,7 +35,14 @@ export default function RSVPForm({ onSuccess }: RSVPFormProps) {
       const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          phone: formData.phone,
+          relation: formData.relation,
+          plusOne: formData.plusOne,
+          plusOneName: formData.plusOne ? formData.plusOneName.trim() : "",
+          receivingNotes: formData.receivingNotes.trim(),
+        }),
       });
       const data = await res.json();
 
@@ -37,7 +55,14 @@ export default function RSVPForm({ onSuccess }: RSVPFormProps) {
 
       onSuccess({ id: data.attendee.id, qrUrl });
       setStep("form");
-      setFormData({ fullName: "", phone: "", relation: "" });
+      setFormData({
+        fullName: "",
+        phone: "",
+        relation: "",
+        plusOne: false,
+        plusOneName: "",
+        receivingNotes: "",
+      });
     } catch (err: unknown) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -107,6 +132,67 @@ export default function RSVPForm({ onSuccess }: RSVPFormProps) {
           <option value="Mutual Friend">Mutual Friend</option>
           <option value="Coworker">Coworker</option>
         </select>
+      </div>
+
+      <fieldset className="space-y-3 rounded-2xl border border-outline-variant/25 bg-surface-container/50 p-4">
+        <legend className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant px-1">
+          Will you bring a plus-one?
+        </legend>
+        <p className="text-[11px] text-on-surface-variant leading-relaxed -mt-1 mb-2">
+          We plan seats and meals per person. Let us know if someone is coming with you.
+        </p>
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input
+              type="radio"
+              name="plusOne"
+              checked={!formData.plusOne}
+              onChange={() => setFormData({ ...formData, plusOne: false, plusOneName: "" })}
+              className="size-4 accent-primary-container shrink-0"
+            />
+            <span className="text-sm font-medium text-on-surface">Just me</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input
+              type="radio"
+              name="plusOne"
+              checked={formData.plusOne}
+              onChange={() => setFormData({ ...formData, plusOne: true })}
+              className="size-4 accent-primary-container shrink-0"
+            />
+            <span className="text-sm font-medium text-on-surface">Me + one guest</span>
+          </label>
+        </div>
+        {formData.plusOne && (
+          <div className="pt-2">
+            <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 ml-1">
+              Plus-one full name
+            </label>
+            <input
+              type="text"
+              value={formData.plusOneName}
+              onChange={(e) => setFormData({ ...formData, plusOneName: e.target.value })}
+              placeholder="Guest's name as it should appear"
+              className="w-full bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-5 py-3.5 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container text-sm"
+            />
+          </div>
+        )}
+      </fieldset>
+
+      <div>
+        <label className="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1.5 ml-1">
+          Receiving &amp; seating (optional)
+        </label>
+        <p className="text-[11px] text-on-surface-variant mb-2 leading-relaxed">
+          Dietary needs, accessibility, children, or how you&apos;d like to be seated with family — anything that helps us host you.
+        </p>
+        <textarea
+          value={formData.receivingNotes}
+          onChange={(e) => setFormData({ ...formData, receivingNotes: e.target.value })}
+          placeholder="E.g. vegetarian meal for my guest, or seated near the bride's family…"
+          rows={3}
+          className="w-full resize-y min-h-[88px] bg-surface-container hover:bg-surface-container-high focus:bg-surface-container-high outline-none px-5 py-4 rounded-2xl text-on-surface transition-colors font-medium border-2 border-transparent focus:border-primary-container text-sm"
+        />
       </div>
 
       <button

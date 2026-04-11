@@ -104,6 +104,7 @@ export default function AdminDashboard() {
                   <th className="px-6 py-4">Guest Name</th>
                   <th className="px-6 py-4">Relation</th>
                   <th className="px-6 py-4">Phone</th>
+                  <th className="px-6 py-4 min-w-[200px]">Plus-one &amp; notes</th>
                   <th className="px-6 py-4">Registered Date</th>
                   <th className="px-6 py-4 text-center">Actions</th>
                 </tr>
@@ -111,14 +112,14 @@ export default function AdminDashboard() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant">
+                    <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant">
                       <div className="w-8 h-8 border-4 border-primary-container border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
                       Loading guests...
                     </td>
                   </tr>
                 ) : attendees.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant font-medium">
+                    <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant font-medium">
                       No guests have RSVP'd yet!
                     </td>
                   </tr>
@@ -136,6 +137,11 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-6 py-4 text-sm text-on-surface-variant">
                         {attendee.phone || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 text-xs text-on-surface-variant max-w-xs">
+                        <span className="whitespace-pre-wrap leading-relaxed block">
+                          {attendee.notes?.trim() ? attendee.notes : '—'}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-xs text-outline">
                         {new Date(attendee.created_at).toLocaleDateString()}

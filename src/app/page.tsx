@@ -51,6 +51,48 @@ function Countdown() {
   );
 }
 
+function RsvpScrollCta({
+  hasTicket,
+  onScrollToRsvp,
+  variant,
+}: {
+  hasTicket: boolean;
+  onScrollToRsvp: () => void;
+  variant: "hero" | "mid" | "prefooter";
+}) {
+  const variantClass =
+    variant === "hero"
+      ? "px-8 py-4 text-sm md:text-base gap-3 rounded-full shadow-lg"
+      : variant === "mid"
+        ? "px-7 py-3.5 text-xs md:text-sm gap-2.5 rounded-full shadow-md"
+        : "px-8 py-4 text-xs md:text-sm gap-3 rounded-full shadow-lg";
+
+  return (
+    <button
+      type="button"
+      onClick={onScrollToRsvp}
+      className={`gold-gradient-btn text-white font-label uppercase tracking-widest inline-flex items-center justify-center transition-transform hover:scale-[1.03] active:scale-[0.98] ${variantClass}`}
+    >
+      <span
+        className="material-symbols-outlined shrink-0"
+        style={{
+          fontSize: variant === "hero" ? "1.5rem" : "1.35rem",
+          fontVariationSettings: "'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24",
+        }}
+        aria-hidden
+      >
+        local_activity
+      </span>
+      <span className="flex flex-col items-start text-left leading-tight">
+        <span>{hasTicket ? "View your ticket" : "RSVP now"}</span>
+        <span className="font-notoSerif normal-case italic font-normal opacity-95 text-[11px] md:text-xs tracking-normal">
+          {hasTicket ? "Your digital pass" : "Confirm attendance"}
+        </span>
+      </span>
+    </button>
+  );
+}
+
 export default function Home() {
   const [ticket, setTicket] = useState<{ id: string; qrUrl: string } | null>(null);
 
@@ -76,10 +118,11 @@ export default function Home() {
           />
           <div className="absolute inset-0 hero-gradient"></div>
         </div>
-        <div className="relative z-10 text-center space-y-4 pb-6 px-6">
+        <div className="relative z-10 text-center space-y-5 pb-8 md:pb-10 px-6 flex flex-col items-center">
           <span className="text-on-surface/90 font-label tracking-[0.3em] uppercase text-xs">You're Invited</span>
           <h1 className="text-6xl md:text-8xl font-cursive text-primary-container drop-shadow-lg">Fish &amp; Hanni</h1>
           <p className="text-on-surface-variant font-notoSerif italic text-xl">The Union of Two Souls</p>
+          <RsvpScrollCta hasTicket={!!ticket} onScrollToRsvp={scrollToRsvp} variant="hero" />
         </div>
       </section>
 
@@ -136,6 +179,14 @@ export default function Home() {
           <Countdown />
         </div>
       </section>
+
+      {/* Mid-page RSVP CTA */}
+      <div className="bg-surface-container-low px-6 pb-16 md:pb-24 flex flex-col items-center gap-3 -mt-2">
+        <p className="text-xs font-label uppercase tracking-[0.2em] text-outline text-center max-w-sm">
+          Save your seat &amp; get your entrance pass
+        </p>
+        <RsvpScrollCta hasTicket={!!ticket} onScrollToRsvp={scrollToRsvp} variant="mid" />
+      </div>
 
       {/* Wrapping Calendar and Map in a side-by-side Grid on Desktop */}
       <div className="bg-surface-container md:bg-transparent">
@@ -331,6 +382,15 @@ export default function Home() {
           </a>
         </div>
       </section>
+
+      {/* Pre-footer RSVP CTA */}
+      <div className="bg-surface px-6 py-14 md:py-20 flex flex-col items-center gap-4 border-t border-outline-variant/15">
+        <h3 className="text-2xl md:text-3xl font-cursive text-primary-container text-center">We&apos;d love to host you</h3>
+        <p className="text-on-surface-variant text-sm text-center max-w-md leading-relaxed">
+          One quick RSVP helps us plan food, seating, and your digital ticket for the gate.
+        </p>
+        <RsvpScrollCta hasTicket={!!ticket} onScrollToRsvp={scrollToRsvp} variant="prefooter" />
+      </div>
 
       {/* 6. RSVP & QR Code Section */}
       <section id="rsvp-section" className="px-6 py-20 md:py-32 flex flex-col items-center scroll-mt-24">
