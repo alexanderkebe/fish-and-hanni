@@ -434,28 +434,7 @@ export default function Home() {
             Help us capture the magic. Take a look at these captured memories and send us the photos you take during the celebration.
           </p>
           
-          <div className="mt-10 flex flex-col items-center gap-6">
-            <a 
-              href="https://t.me/FandHForEverbot" 
-              target="_blank" 
-              rel="noreferrer"
-              className="gold-gradient-btn text-white px-8 py-4 rounded-full font-label uppercase tracking-widest flex items-center gap-3 shadow-lg hover:scale-105 transition-transform"
-            >
-              <span className="material-symbols-outlined">send</span>
-              Send Your Photos & Wishes
-            </a>
-            
-            <div className="flex flex-col items-center gap-2">
-              <div className="bg-white p-3 rounded-2xl shadow-sm border border-outline-variant/30">
-                <img 
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://t.me/FandHForEverbot&color=775a19&bgcolor=ffffff" 
-                  alt="Telegram Bot QR" 
-                  className="w-24 h-24"
-                />
-              </div>
-              <p className="text-[10px] font-label uppercase tracking-[0.2em] text-outline">Scan to open Telegram</p>
-            </div>
-          </div>
+
         </div>
 
         {/* Auto Scrolling Gallery */}
@@ -495,9 +474,9 @@ export default function Home() {
 
         {/* Telegram Share Button */}
         <div className="max-w-md md:max-w-full mx-auto text-center px-6">
-          <a href="https://t.me/fish_and_hanni_wedding_bot" target="_blank" rel="noreferrer" className="gold-gradient-btn text-white py-4 md:py-5 px-8 md:px-12 rounded-full text-xs md:text-sm font-label uppercase tracking-widest inline-flex items-center justify-center gap-3 transition-all hover:scale-[1.05] shadow-lg">
+          <a href="https://t.me/FandHForEverbot" target="_blank" rel="noreferrer" className="gold-gradient-btn text-white py-4 md:py-5 px-8 md:px-12 rounded-full text-xs md:text-sm font-label uppercase tracking-widest inline-flex items-center justify-center gap-3 transition-all hover:scale-[1.05] shadow-lg">
               <span className="material-symbols-outlined text-lg md:text-xl">send</span>
-              Share us on Telegram
+              Send Your Photos &amp; Wishes
           </a>
         </div>
       </section>
