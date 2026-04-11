@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase
       .from("attendees")
-      .select("id")
+      .select("id, full_name")
       .eq("id", id)
       .maybeSingle();
 
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ id: data.id });
+    return NextResponse.json({ id: data.id, full_name: data.full_name });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });

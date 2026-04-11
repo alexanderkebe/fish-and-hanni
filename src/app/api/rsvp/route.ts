@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       ? String(receivingNotes).trim()
       : null
 
-    // Columns: plus_one, plus_one_name, receiving_notes — add via supabase/migrations/*.sql
+    // Columns: plus_one, plus_one_name, receiving_notes, party_leader_id — see supabase/migrations/
     const { data, error } = await supabase
       .from('attendees')
       .insert([
@@ -45,6 +45,38 @@ export async function POST(request: Request) {
     if (error) {
       console.error('Supabase error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    if (hasPlusOne) {
+      const guestName = String(plusOneName).trim()
+      const { data: plusRow, error: plusErr } = await supabase
+        .from('attendees')
+        .insert([
+          {
+            full_name: guestName,
+            phone: phone || null,
+            relation: `Plus-one (with ${fullName})`,
+            status: 'attending',
+            plus_one: false,
+            plus_one_name: null,
+            receiving_notes: null,
+            party_leader_id: data.id,
+          },
+        ])
+        .select()
+        .single()
+
+      if (plusErr) {
+        console.error('Supabase plus-one error:', plusErr)
+        await supabase.from('attendees').delete().eq('id', data.id)
+        return NextResponse.json({ error: plusErr.message }, { status: 500 })
+      }
+
+      return NextResponse.json({
+        success: true,
+        attendee: data,
+        plusOneAttendee: plusRow,
+      })
     }
 
     return NextResponse.json({ success: true, attendee: data })

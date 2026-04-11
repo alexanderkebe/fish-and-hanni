@@ -1,9 +1,25 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { type AttendeeRow, getPlusOneInfo, getReceivingNotes } from "@/lib/attendeeDisplay";
+
+function formatCheckedInAt(iso: string | null | undefined): string {
+  if (!iso) return "";
+  try {
+    return new Date(iso).toLocaleString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  } catch {
+    return "";
+  }
+}
 
 function VerificationContent() {
   const searchParams = useSearchParams();
@@ -11,6 +27,13 @@ function VerificationContent() {
 
   const [status, setStatus] = useState<'loading' | 'valid' | 'invalid' | 'error' | 'already_checked_in' | 'checking_in'>('loading');
   const [attendee, setAttendee] = useState<AttendeeRow | null>(null);
+  const admittedViaButtonRef = useRef(false);
+  const dupViewLoggedRef = useRef(false);
+
+  useEffect(() => {
+    admittedViaButtonRef.current = false;
+    dupViewLoggedRef.current = false;
+  }, [id]);
 
   useEffect(() => {
     if (!id) {
@@ -45,6 +68,19 @@ function VerificationContent() {
     checkId();
   }, [id]);
 
+  useEffect(() => {
+    if (status !== "already_checked_in" || !attendee?.id) return;
+    if (admittedViaButtonRef.current || dupViewLoggedRef.current) return;
+    dupViewLoggedRef.current = true;
+    void fetch("/api/gate/duplicate-scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ attendeeId: attendee.id }),
+    }).catch(() => {
+      dupViewLoggedRef.current = false;
+    });
+  }, [status, attendee?.id]);
+
   if (status === 'loading') {
     return (
       <div className="flex flex-col items-center">
@@ -78,12 +114,20 @@ function VerificationContent() {
 
   if (status === 'already_checked_in') {
     return (
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center w-full">
         <span className="material-symbols-outlined text-6xl text-error mb-4">warning</span>
         <h2 className="text-2xl font-bold text-error mb-2 text-center leading-tight">Already<br/>Checked In!</h2>
-        <p className="text-sm text-center text-on-surface-variant bg-error-container text-on-error-container p-3 rounded-xl mt-2 mb-6 shadow-sm border border-error/20 inline-block">
-          This QR code has ALREADY been used to enter the venue. This could be a forwarded or duplicate ticket.
+        <p className="text-sm text-center text-on-surface-variant bg-error-container text-on-error-container p-3 rounded-xl mt-2 mb-4 shadow-sm border border-error/20 inline-block">
+          This QR was already used at the gate. Do not admit again — this may be a screenshot, forwarded ticket, or imposter. The attempt is logged.
         </p>
+        {attendee?.checked_in_at ? (
+          <p className="text-xs font-label uppercase tracking-widest text-outline mb-4">
+            First admitted:{" "}
+            <span className="text-on-surface font-semibold normal-case tracking-normal">
+              {formatCheckedInAt(attendee.checked_in_at)}
+            </span>
+          </p>
+        ) : null}
         <div className="bg-surface-container/50 w-full p-4 rounded-2xl flex flex-col items-center text-center">
             <span className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-1">Registered To</span>
             <p className="font-bold text-lg">{attendee?.full_name}</p>
@@ -94,6 +138,12 @@ function VerificationContent() {
               </p>
             )}
         </div>
+        <Link
+          href="/scanner"
+          className="mt-8 text-xs font-label uppercase tracking-widest text-primary hover:underline"
+        >
+          ← Back to gate scanner
+        </Link>
       </div>
     );
   }
@@ -152,17 +202,54 @@ function VerificationContent() {
         }`}
         onClick={async () => {
           setStatus('checking_in');
-          const { error } = await supabase
-            .from('attendees')
-            .update({ status: 'checked_in' })
-            .eq('id', attendee.id);
-            
-          if (error) {
-            alert("Database Error: " + error.message + "\n\nDid you run the SQL Update Policy?");
-            setStatus('valid');
-            return;
+          try {
+            const res = await fetch("/api/gate/check-in", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ attendeeId: attendee.id }),
+            });
+            const payload = await res.json();
+
+            if (res.ok && payload.attendee) {
+              admittedViaButtonRef.current = true;
+              setAttendee((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      status: "checked_in",
+                      checked_in_at: payload.attendee.checked_in_at,
+                    }
+                  : prev
+              );
+              setStatus("already_checked_in");
+              return;
+            }
+
+            if (res.status === 409 && payload.attendee) {
+              admittedViaButtonRef.current = true;
+              setAttendee((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      status: "checked_in",
+                      checked_in_at: payload.attendee.checked_in_at ?? prev.checked_in_at,
+                    }
+                  : prev
+              );
+              setStatus("already_checked_in");
+              return;
+            }
+
+            alert(
+              "Check-in failed: " +
+                (payload.error || res.statusText) +
+                "\n\nConfirm Supabase policies allow update on attendees and run the gate migration (checked_in_at + check_in_logs)."
+            );
+            setStatus("valid");
+          } catch (e: unknown) {
+            alert(e instanceof Error ? e.message : "Network error");
+            setStatus("valid");
           }
-          setStatus('already_checked_in');
         }}
       >
         {status === 'checking_in' ? (
@@ -177,6 +264,13 @@ function VerificationContent() {
             </>
         )}
       </button>
+
+      <Link
+        href="/scanner"
+        className="mt-8 text-xs font-label uppercase tracking-widest text-primary hover:underline"
+      >
+        ← Back to gate scanner
+      </Link>
     </div>
   );
 }

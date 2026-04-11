@@ -180,6 +180,11 @@ export default function AdminDashboard() {
                           <div className="text-[10px] text-outline mt-0.5 capitalize">
                             {attendee.status?.replace("_", " ") || "—"}
                           </div>
+                          {attendee.party_leader_id ? (
+                            <div className="text-[9px] text-primary font-semibold mt-1 uppercase tracking-wider">
+                              Own QR (plus-one)
+                            </div>
+                          ) : null}
                         </td>
                         <td className="px-4 py-3">
                           <span className="bg-secondary-container/50 text-on-secondary-container px-2.5 py-1 rounded-full text-xs font-medium inline-block max-w-[140px] break-words">

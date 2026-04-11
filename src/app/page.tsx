@@ -4,11 +4,19 @@ import { useEffect, useState } from "react";
 import {
   buildTicketQrUrl,
   clearStoredTicketId,
-  persistTicketId,
-  readStoredTicketId,
+  persistTicketBundle,
+  readStoredTicketBundle,
 } from "@/lib/weddingTicket";
 import { supabase } from "@/lib/supabase";
 import RSVPForm from "@/components/RSVPForm";
+import DigitalInviteExport from "@/components/DigitalInviteExport";
+
+export type HomeTicketState = {
+  id: string;
+  qrUrl: string;
+  primaryName: string;
+  plusOne?: { id: string; qrUrl: string; fullName: string };
+};
 
 function Countdown() {
   const [mounted, setMounted] = useState(false);
@@ -101,23 +109,61 @@ function RsvpScrollCta({
 }
 
 export default function Home() {
-  const [ticket, setTicket] = useState<{ id: string; qrUrl: string } | null>(null);
+  const [ticket, setTicket] = useState<HomeTicketState | null>(null);
   /** False until we finish reading localStorage + verifying id with the database */
   const [ticketHydrated, setTicketHydrated] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+
+    async function loadCompanionForPrimary(
+      primaryId: string,
+      bundleCompanionId: string | undefined
+    ): Promise<HomeTicketState["plusOne"]> {
+      if (bundleCompanionId) {
+        const { data: comp } = await supabase
+          .from("attendees")
+          .select("id, full_name, party_leader_id")
+          .eq("id", bundleCompanionId)
+          .maybeSingle();
+        if (
+          comp?.id &&
+          comp.party_leader_id === primaryId &&
+          comp.full_name
+        ) {
+          return {
+            id: comp.id,
+            qrUrl: buildTicketQrUrl(window.location.origin, comp.id),
+            fullName: comp.full_name,
+          };
+        }
+      }
+      const { data: comp } = await supabase
+        .from("attendees")
+        .select("id, full_name")
+        .eq("party_leader_id", primaryId)
+        .maybeSingle();
+      if (comp?.id && comp.full_name) {
+        return {
+          id: comp.id,
+          qrUrl: buildTicketQrUrl(window.location.origin, comp.id),
+          fullName: comp.full_name,
+        };
+      }
+      return undefined;
+    }
+
     (async () => {
-      const stored = readStoredTicketId();
+      const bundle = readStoredTicketBundle();
+      const stored = bundle?.primaryId;
       if (!stored) {
         if (!cancelled) setTicketHydrated(true);
         return;
       }
       try {
-        // Same path as /verify: browser Supabase client (RLS often allows this when server route does not).
         const { data, error } = await supabase
           .from("attendees")
-          .select("id")
+          .select("id, full_name")
           .eq("id", stored)
           .maybeSingle();
 
@@ -127,19 +173,34 @@ export default function Home() {
           console.error("[ticket restore]", error.message);
           const res = await fetch(`/api/rsvp/ticket?id=${encodeURIComponent(stored)}`);
           if (!cancelled && res.ok) {
-            const j = (await res.json()) as { id: string };
+            const j = (await res.json()) as { id: string; full_name?: string };
+            const plusOne = await loadCompanionForPrimary(j.id, bundle?.companionId);
             setTicket({
               id: j.id,
               qrUrl: buildTicketQrUrl(window.location.origin, j.id),
+              primaryName: j.full_name?.trim() || "Guest",
+              plusOne,
             });
+            if (plusOne) {
+              persistTicketBundle({ primaryId: j.id, companionId: plusOne.id });
+            }
           } else if (!cancelled) {
             clearStoredTicketId();
           }
-        } else if (data?.id) {
+        } else if (data?.id && data.full_name) {
+          const plusOne = await loadCompanionForPrimary(data.id, bundle?.companionId);
           setTicket({
             id: data.id,
             qrUrl: buildTicketQrUrl(window.location.origin, data.id),
+            primaryName: data.full_name,
+            plusOne,
           });
+          if (plusOne && bundle?.companionId !== plusOne.id) {
+            persistTicketBundle({ primaryId: data.id, companionId: plusOne.id });
+          }
+          if (!plusOne && bundle?.companionId) {
+            persistTicketBundle({ primaryId: data.id });
+          }
         } else {
           clearStoredTicketId();
         }
@@ -478,7 +539,10 @@ export default function Home() {
             </div>
             <RSVPForm
               onSuccess={(data) => {
-                persistTicketId(String(data.id));
+                persistTicketBundle({
+                  primaryId: String(data.id),
+                  companionId: data.plusOne?.id,
+                });
                 setTicket(data);
                 window.requestAnimationFrame(() => {
                   document.getElementById("rsvp-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -487,27 +551,36 @@ export default function Home() {
             />
           </div>
         ) : (
-          <div className="glass-card p-10 md:p-16 rounded-[48px] shadow-sm md:shadow-lg flex flex-col items-center max-w-xs md:max-w-md w-full text-center hover:scale-[1.02] transition-transform duration-700 animate-in fade-in zoom-in">
-            <div className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-label uppercase tracking-widest mb-6 flex items-center gap-2">
+          <div className="glass-card p-6 sm:p-10 md:p-12 rounded-[48px] shadow-sm md:shadow-lg flex flex-col items-center w-full max-w-lg min-w-0 overflow-hidden box-border transition-transform duration-700 animate-in fade-in zoom-in">
+            <div className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-label uppercase tracking-widest mb-6 flex items-center gap-2 shrink-0">
               <span className="material-symbols-outlined text-sm">verified</span>
               Registration Confirmed
             </div>
-            
-            <div className="qr-metallic p-6 rounded-[32px] mb-8 relative">
-              <div className="bg-white p-2 rounded-[16px] shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)]">
-                  <img src={ticket.qrUrl} alt="Your Unique Entrance Pass" className="w-40 h-40 mix-blend-multiply" />
-              </div>
-            </div>
-            
-            <p className="text-xs font-label text-outline uppercase tracking-widest mb-2">Ticket ID</p>
-            <p className="text-[10px] font-mono text-on-surface-variant bg-surface-variant/50 px-3 py-1.5 rounded-lg select-all">
-              {ticket.id}
-            </p>
-            <p className="text-sm font-notoSerif italic text-on-surface-variant mt-6">
-              Please present this QR code at the entrance.
-            </p>
-            <p className="text-[11px] text-outline text-center mt-4 max-w-xs leading-relaxed">
-              This ticket is saved on this browser. One device keeps one pass—screenshot or add to home screen if you need a backup.
+
+            <DigitalInviteExport
+              primaryGuestName={ticket.primaryName}
+              slots={[
+                {
+                  id: ticket.id,
+                  qrUrl: ticket.qrUrl,
+                  title: "Guest",
+                  subtitle: ticket.primaryName,
+                },
+                ...(ticket.plusOne
+                  ? [
+                      {
+                        id: ticket.plusOne.id,
+                        qrUrl: ticket.plusOne.qrUrl,
+                        title: "Plus-one",
+                        subtitle: ticket.plusOne.fullName,
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+
+            <p className="text-[11px] text-outline text-center mt-6 max-w-sm leading-relaxed px-2">
+              This invite is saved on this browser—each QR is scanned once at the gate. Use the button above to save a picture, or screenshot as a backup.
             </p>
           </div>
         )}

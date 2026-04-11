@@ -10,10 +10,12 @@ export type AttendeeRow = {
   relation: string;
   status: string;
   created_at: string;
+  checked_in_at?: string | null;
   plus_one?: boolean | null;
   plus_one_name?: string | null;
   receiving_notes?: string | null;
   notes?: string | null;
+  party_leader_id?: string | null;
 };
 
 const PLUS_LINE = /^Plus-one:\s*(.+)$/m;
@@ -52,10 +54,13 @@ export function getReceivingNotes(a: AttendeeRow): string | null {
   return m ? m[1].trim() : null;
 }
 
-export function headcountForAttendee(a: AttendeeRow): number {
-  return getPlusOneInfo(a).hasPlusOne ? 2 : 1;
-}
-
+/** Total guests: companion rows are one person each; primaries without a companion row use plus_one for legacy pairs. */
 export function totalEstimatedHeadcount(rows: AttendeeRow[]): number {
-  return rows.reduce((s, a) => s + headcountForAttendee(a), 0);
+  return rows
+    .filter((a) => !a.party_leader_id)
+    .reduce((sum, a) => {
+      const companions = rows.filter((r) => r.party_leader_id === a.id).length;
+      if (companions > 0) return sum + 1 + companions;
+      return sum + (getPlusOneInfo(a).hasPlusOne ? 2 : 1);
+    }, 0);
 }

@@ -3,8 +3,15 @@
 import { useState, FormEvent } from "react";
 import { buildTicketQrUrl } from "@/lib/weddingTicket";
 
+export type RsvpSuccessPayload = {
+  id: string;
+  qrUrl: string;
+  primaryName: string;
+  plusOne?: { id: string; qrUrl: string; fullName: string };
+};
+
 interface RSVPFormProps {
-  onSuccess: (attendeeData: { id: string; qrUrl: string }) => void;
+  onSuccess: (data: RsvpSuccessPayload) => void;
 }
 
 export default function RSVPForm({ onSuccess }: RSVPFormProps) {
@@ -45,15 +52,35 @@ export default function RSVPForm({ onSuccess }: RSVPFormProps) {
           receivingNotes: formData.receivingNotes.trim(),
         }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as {
+        error?: string;
+        attendee: { id: string };
+        plusOneAttendee?: { id: string };
+      };
 
       if (!res.ok) {
         throw new Error(data.error || "Failed to submit RSVP");
       }
 
       const qrUrl = buildTicketQrUrl(window.location.origin, data.attendee.id);
+      const base: RsvpSuccessPayload = {
+        id: data.attendee.id,
+        qrUrl,
+        primaryName: formData.fullName.trim(),
+      };
 
-      onSuccess({ id: data.attendee.id, qrUrl });
+      if (data.plusOneAttendee?.id) {
+        onSuccess({
+          ...base,
+          plusOne: {
+            id: data.plusOneAttendee.id,
+            qrUrl: buildTicketQrUrl(window.location.origin, data.plusOneAttendee.id),
+            fullName: formData.plusOneName.trim(),
+          },
+        });
+      } else {
+        onSuccess(base);
+      }
       setStep("form");
       setFormData({
         fullName: "",
