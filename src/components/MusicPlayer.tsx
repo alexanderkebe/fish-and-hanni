@@ -29,16 +29,10 @@ export default function MusicPlayer() {
     const onReady = () => {
       setReady(true);
 
-      // Try to play immediately (muted autoplay is allowed everywhere)
+      // Start muted (browser policy), unmute instantly once playback begins
       audio.play()
         .then(() => {
-          // Ramp volume up smoothly over ~1 second
-          let v = 0;
-          const ramp = setInterval(() => {
-            v = Math.min(v + 0.035, 0.35);
-            audio.volume = v;
-            if (v >= 0.35) clearInterval(ramp);
-          }, 100);
+          audio.volume = 0.35; // unmute immediately — user hears it right away
           setPlaying(true);
         })
         .catch(() => {
